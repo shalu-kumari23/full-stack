@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Registration Form</title>
+
+<style>
+body{
+font-family: Arial;
+background:#f4f4f4;
+}
+
+.container{
+width:350px;
+margin:50px auto;
+background:white;
+padding:20px;
+border-radius:10px;
+box-shadow:0 0 10px rgba(0,0,0,0.2);
+}
+
+input{
+width:100%;
+padding:8px;
+margin-top:5px;
+}
+
+.error{
+color:red;
+font-size:12px;
+}
+
+.strength{
+height:5px;
+background:lightgray;
+margin-top:5px;
+}
+
+.strength div{
+height:5px;
+width:0%;
+}
+
+.weak{background:red;width:33%;}
+.medium{background:orange;width:66%;}
+.strong{background:green;width:100%;}
+
+.toggle{
+cursor:pointer;
+font-size:12px;
+color:blue;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<h2>Registration Form</h2>
+
+<form>
+
+<label>Name</label>
+<input type="text" id="name">
+<div id="nameError" class="error"></div>
+
+<br>
+
+<label>Email</label>
+<input type="text" id="email">
+<div id="emailError" class="error"></div>
+
+<br>
+
+<label>Phone</label>
+<input type="text" id="phone">
+<div id="phoneError" class="error"></div>
+
+<br>
+
+<label>Password</label>
+<input type="password" id="password">
+<span class="toggle" onclick="togglePassword()">Show</span>
+
+<div class="strength">
+<div id="strengthBar"></div>
+</div>
+
+<div id="passError" class="error"></div>
+
+<br><br>
+
+<button type="submit">Register</button>
+
+</form>
+
+</div>
+
+<script>
+
+let nameInput = document.getElementById("name");
+let emailInput = document.getElementById("email");
+let phoneInput = document.getElementById("phone");
+let passInput = document.getElementById("password");
+
+nameInput.addEventListener("input",function(){
+
+if(nameInput.value.length < 3){
+document.getElementById("nameError").innerText="Name must be at least 3 characters";
+}else{
+document.getElementById("nameError").innerText="";
+}
+
+});
+
+emailInput.addEventListener("input",function(){
+
+let pattern=/^[^ ]+@[^ ]+\.[a-z]{2,3}$/;
+
+if(!emailInput.value.match(pattern)){
+document.getElementById("emailError").innerText="Enter valid email";
+}else{
+document.getElementById("emailError").innerText="";
+}
+
+});
+
+phoneInput.addEventListener("input",function(){
+
+let pattern=/^[0-9]{10}$/;
+
+if(!phoneInput.value.match(pattern)){
+document.getElementById("phoneError").innerText="Phone must be 10 digits";
+}else{
+document.getElementById("phoneError").innerText="";
+}
+
+});
+
+passInput.addEventListener("input",function(){
+
+let pass=passInput.value;
+let bar=document.getElementById("strengthBar");
+
+if(pass.length<6){
+bar.className="";
+document.getElementById("passError").innerText="Password must be at least 6 characters";
+}
+else if(pass.length<8){
+bar.className="weak";
+document.getElementById("passError").innerText="";
+}
+else if(pass.match(/[A-Z]/) && pass.match(/[0-9]/)){
+bar.className="strong";
+document.getElementById("passError").innerText="";
+}
+else{
+bar.className="medium";
+document.getElementById("passError").innerText="";
+}
+
+});
+
+function togglePassword(){
+
+let pass=document.getElementById("password");
+
+if(pass.type==="password"){
+pass.type="text";
+}else{
+pass.type="password";
+}
+
+}
+
+</script>
+
+</body>
+</html>
