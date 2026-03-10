@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sticky Notes Workspace</title>
+</head>
+
+<body style="
+margin:0;
+font-family:Segoe UI, Arial, sans-serif;
+display:flex;
+height:100vh;
+background:#111827;
+color:white;
+">
+
+<!-- SIDEBAR -->
+<div style="
+width:280px;
+background:#1f2937;
+padding:30px 20px;
+box-sizing:border-box;
+display:flex;
+flex-direction:column;
+gap:20px;
+border-right:1px solid rgba(255,255,255,0.08);
+">
+
+<h2 style="margin:0;color:#facc15;">🗂 Notes</h2>
+
+<input id="noteInput"
+placeholder="Write a note..."
+style="
+padding:12px;
+border-radius:8px;
+border:none;
+font-size:0.95rem;
+outline:none;
+background:#374151;
+color:white;
+">
+
+<button onclick="addNote()" style="
+padding:10px;
+border:none;
+border-radius:8px;
+background:#facc15;
+font-weight:600;
+cursor:pointer;
+">Add Note</button>
+
+<div style="font-size:0.8rem;color:#9ca3af;">Pick colour</div>
+
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+
+<div onclick="selectColor('yellow',this)" id="dot-yellow"
+style="width:22px;height:22px;border-radius:50%;background:#fde68a;border:2px solid white;cursor:pointer"></div>
+
+<div onclick="selectColor('green',this)" id="dot-green"
+style="width:22px;height:22px;border-radius:50%;background:#bbf7d0;border:2px solid transparent;cursor:pointer"></div>
+
+<div onclick="selectColor('blue',this)" id="dot-blue"
+style="width:22px;height:22px;border-radius:50%;background:#bfdbfe;border:2px solid transparent;cursor:pointer"></div>
+
+<div onclick="selectColor('pink',this)" id="dot-pink"
+style="width:22px;height:22px;border-radius:50%;background:#fbcfe8;border:2px solid transparent;cursor:pointer"></div>
+
+<div onclick="selectColor('purple',this)" id="dot-purple"
+style="width:22px;height:22px;border-radius:50%;background:#ddd6fe;border:2px solid transparent;cursor:pointer"></div>
+
+</div>
+
+<div id="countBadge" style="margin-top:auto;font-size:0.8rem;color:#9ca3af">
+0 notes
+</div>
+
+</div>
+
+
+<!-- MAIN BOARD -->
+<div style="
+flex:1;
+padding:40px;
+overflow:auto;
+">
+
+<h1 style="margin-top:0;margin-bottom:30px;font-weight:600">
+📝 Sticky Notes Board
+</h1>
+
+<div id="board" style="
+column-count:4;
+column-gap:20px;
+"></div>
+
+</div>
+
+
+<script>
+
+const colorMap={
+yellow:'#fde68a',
+green:'#bbf7d0',
+blue:'#bfdbfe',
+pink:'#fbcfe8',
+purple:'#ddd6fe'
+};
+
+let notes=JSON.parse(localStorage.getItem('sticky-notes'))||[];
+let selectedColor='yellow';
+
+renderNotes();
+
+function selectColor(color,el){
+selectedColor=color;
+
+Object.keys(colorMap).forEach(c=>{
+document.getElementById('dot-'+c).style.border='2px solid transparent';
+});
+
+el.style.border='2px solid white';
+}
+
+function addNote(){
+
+const input=document.getElementById('noteInput');
+const text=input.value.trim();
+
+if(!text) return;
+
+notes.push({
+id:Date.now(),
+text:text,
+color:selectedColor
+});
+
+localStorage.setItem('sticky-notes',JSON.stringify(notes));
+input.value='';
+renderNotes();
+}
+
+function deleteNote(id){
+
+notes=notes.filter(n=>n.id!==id);
+localStorage.setItem('sticky-notes',JSON.stringify(notes));
+renderNotes();
+
+}
+
+function editNote(id){
+
+const note=notes.find(n=>n.id===id);
+const card=document.querySelector(`[data-id="${id}"]`);
+
+card.innerHTML=`
+
+<textarea id="edit-${id}" style="
+width:100%;
+height:80px;
+border:none;
+border-radius:8px;
+padding:8px;
+font-size:0.95rem;
+box-sizing:border-box;
+">${note.text}</textarea>
+
+<div style="margin-top:10px;display:flex;gap:6px">
+
+<button onclick="saveNote(${id})"
+style="
+padding:5px 10px;
+border:none;
+border-radius:6px;
+background:#22c55e;
+color:white;
+cursor:pointer;
+font-size:0.75rem;
+">Save</button>
+
+<button onclick="deleteNote(${id})"
+style="
+padding:5px 10px;
+border:none;
+border-radius:6px;
+background:#ef4444;
+color:white;
+cursor:pointer;
+font-size:0.75rem;
+">Delete</button>
+
+</div>
+`;
+
+}
+
+function saveNote(id){
+
+const newText=document.getElementById(`edit-${id}`).value.trim();
+
+if(!newText) return;
+
+notes.find(n=>n.id===id).text=newText;
+
+localStorage.setItem('sticky-notes',JSON.stringify(notes));
+
+renderNotes();
+
+}
+
+function renderNotes(){
+
+const board=document.getElementById('board');
+
+document.getElementById('countBadge').textContent=
+notes.length+" notes";
+
+board.innerHTML="";
+
+notes.forEach(note=>{
+
+const card=document.createElement('div');
+
+card.dataset.id=note.id;
+
+card.style.cssText=`
+background:${colorMap[note.color]};
+padding:16px;
+border-radius:12px;
+margin-bottom:20px;
+break-inside:avoid;
+color:#111;
+box-shadow:0 6px 20px rgba(0,0,0,0.3);
+`;
+
+card.innerHTML=`
+
+<div style="font-size:1rem;margin-bottom:12px">
+${note.text}
+</div>
+
+<div style="display:flex;gap:6px">
+
+<button onclick="editNote(${note.id})"
+style="
+padding:5px 10px;
+border:none;
+border-radius:6px;
+background:#3b82f6;
+color:white;
+cursor:pointer;
+font-size:0.75rem;
+">Edit</button>
+
+<button onclick="deleteNote(${note.id})"
+style="
+padding:5px 10px;
+border:none;
+border-radius:6px;
+background:#ef4444;
+color:white;
+cursor:pointer;
+font-size:0.75rem;
+">Delete</button>
+
+</div>
+`;
+
+board.appendChild(card);
+
+});
+
+}
+
+document.getElementById("noteInput").addEventListener("keydown",e=>{
+if(e.key==="Enter") addNote();
+});
+
+</script>
+
+</body>
+</html>
